@@ -1,1 +1,2 @@
-# diplomova-praca
+# MASTER THESIS
+Diplomova praca
