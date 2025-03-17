@@ -16,19 +16,19 @@ def analyze_locality(file_path, window_size):
         prev_addr = addresses[i - 1]
         curr_addr = addresses[i]
 
-        # Spatial locality (current address is within range of previous address)
+        # Spatial locality
         if abs(curr_addr - prev_addr) <= window_size:
             spatial_count += 1
 
-        # Sequential locality (current address is exactly previous +1)
+        # Sequential locality
         if curr_addr == prev_addr + 1:
             sequential_count += 1
 
-        # Temporal locality (current address appeared in recent window)
+        # Temporal locality
         if curr_addr in recent_addresses:
             temporal_count += 1
         
-        recent_addresses.append(curr_addr)  # Update window
+        recent_addresses.append(curr_addr)
     
     # Calculate percentages
     spatial_locality = (spatial_count / total_accesses) * 100
