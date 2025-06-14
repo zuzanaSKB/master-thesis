@@ -1,5 +1,3 @@
-# python generate_graph.py input.txt output.txt
-
 import sys
 from collections import defaultdict
 
@@ -12,18 +10,19 @@ def build_adjacency_list(addresses):
     for i in range(len(addresses) - 1):
         src = addresses[i]
         dst = addresses[i + 1]
-        graph[src].append(dst)
+        weight = 1
+        graph[src].append((dst, weight))
     return graph
 
 def write_adjacency_list(graph, filename):
     with open(filename, 'w') as f:
         for node, neighbors in graph.items():
-            neighbors_str = ' '.join(neighbors)
+            neighbors_str = ' '.join([f"{dst}({weight})" for dst, weight in neighbors])
             f.write(f"{node}: {neighbors_str}\n")
 
 def main():
     if len(sys.argv) != 3:
-        print("Usage: python generate_graph.py <input_file> <output_file>")
+        print("Usage: python3 generate_graph.py <input_file> <output_file>")
         sys.exit(1)
 
     input_file = sys.argv[1]
