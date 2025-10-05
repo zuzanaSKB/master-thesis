@@ -10,29 +10,31 @@ def analyze_locality(file_path, window_size, alignment_sizes):
     temporal_count = 0
     total_accesses = len(addresses)
     
-    recent_addresses = deque(maxlen=window_size)  # Sliding window for temporal locality
+    recent_addresses = deque(maxlen=window_size) # Sliding window for temporal locality
     alignment_counts = Counter()
 
+    # Count alignment for all addresses
+    for addr in addresses:
+        for align in alignment_sizes:
+            if addr % align == 0:
+                alignment_counts[align] += 1
+                break
+
+    # Add first address to recent_addresses
+    if addresses:
+        recent_addresses.append(addresses[0])
+
+    # Analyze locality starting from second address
     for i in range(1, total_accesses):
         curr_addr = addresses[i]
-
-        # Count alignment
-        for align in alignment_sizes:
-            if curr_addr % align == 0:
-                alignment_counts[align] += 1
-
-        if i == 0:
-            recent_addresses.append(curr_addr)
-            continue
-
         prev_addr = addresses[i - 1]
 
-        # Spatial locality 
+        # Spatial locality
         # accesses to addresses within 'window_size' bytes (in either direction)
         if abs(curr_addr - prev_addr) <= window_size:
             spatial_count += 1
 
-        # Sequential locality 
+        # Sequential locality
         # accesses to the next address within +8 bytes (only forward)
         diff = curr_addr - prev_addr
         if 0 < diff <= 8:
@@ -43,7 +45,7 @@ def analyze_locality(file_path, window_size, alignment_sizes):
         if curr_addr in recent_addresses:
             temporal_count += 1
         
-        # update window
+        # Update window
         recent_addresses.append(curr_addr)  
     
     # Calculate percentages
@@ -69,6 +71,6 @@ if __name__ == "__main__":
 
     trace_file = sys.argv[1]
     window_size = int(sys.argv[2])
-
-    alignment_sizes = [2, 4, 8, 16, 32, 64]
+    
+    alignment_sizes = [128, 64, 32, 16, 8, 4, 2]
     analyze_locality(trace_file, window_size, alignment_sizes)
