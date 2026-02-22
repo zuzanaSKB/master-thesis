@@ -71,7 +71,9 @@ def classify_page(page, regions, main_exec_path=None):
             lower = path.lower()
 
             # Kernel/pseudo mappings
-            if lower in ("[vdso]", "[vvar]", "[vvar_vclock]", "[vsyscall]") or "vdso" in lower or "vvar" in lower or "vsyscall" in lower:
+            if lower == "[vdso]":
+                return "vdso"
+            if lower in ("[vvar]", "[vvar_vclock]", "[vsyscall]") or "vdso" in lower or "vvar" in lower or "vsyscall" in lower:
                 return "kernel"
 
             # Stack/heap regions
@@ -149,6 +151,7 @@ def color_for_region(region_name):
         "lib": "#ff7f00",     # orange
         "exec": "#984ea3",    # purple
         "anon": "#a65628",    # brown
+        "vdso": "#fc8eac",    # flamingo
         "kernel": "#e41a1c",  # red
         "file": "#66c2a5",    # turquoise
         "unknown": "#999999", # gray
@@ -219,7 +222,8 @@ def create_page_reference_map(trace_file, pages, map_file=None):
             Patch(facecolor=color_for_region("exec"), label="Executable"),
             Patch(facecolor=color_for_region("file"), label="File (non-exec)"),
             Patch(facecolor=color_for_region("anon"), label="Anonymous"),
-            Patch(facecolor=color_for_region("kernel"), label="Kernel/VDSO"),
+            Patch(facecolor=color_for_region("vdso"), label="VDSO"),
+            Patch(facecolor=color_for_region("kernel"), label="Kernel"),
             
         ]
         print("  Memory coloring applied based on:", map_file)
@@ -266,7 +270,21 @@ def create_page_reference_map(trace_file, pages, map_file=None):
         fontweight="bold",
     )
     plt.xlabel("Sliding Window Index")
-    plt.ylabel("Page ID (compact)")
+     # -----------------------------------------------------------------
+    # Y-axis labels as hexadecimal page addresses
+    # -----------------------------------------------------------------
+    plt.ylabel("Page Address (compact rows)")
+    num_ticks = min(12, num_unique_pages)
+    tick_positions = np.linspace(0, num_unique_pages - 1, num_ticks)
+    tick_positions = np.unique(np.round(tick_positions).astype(int))  # avoid duplicates
+
+    tick_labels = []
+    for i in tick_positions:
+        addr = sorted_pages[i] # address of the page that corresponds to this row
+        tick_labels.append(f"0x{addr:x}")
+
+    plt.yticks(tick_positions, tick_labels)
+
     plt.legend(handles=legend_patches, loc="upper left", fontsize=8, frameon=True)
     plt.tight_layout()
     plt.show()
