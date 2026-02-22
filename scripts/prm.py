@@ -73,9 +73,10 @@ def classify_page(page, regions, main_exec_path=None):
             # Kernel/pseudo mappings
             if lower == "[vdso]":
                 return "vdso"
-            if lower in ("[vvar]", "[vvar_vclock]", "[vsyscall]") or "vdso" in lower or "vvar" in lower or "vsyscall" in lower:
-                return "kernel"
-
+            if lower in ("[vvar]", "[vvar_vclock]"):
+                return "vvar"
+            if lower == "[vsyscall]":
+                return "vsyscall"
             # Stack/heap regions
             if lower == "[stack]":
                 return "stack"
@@ -151,8 +152,9 @@ def color_for_region(region_name):
         "lib": "#ff7f00",     # orange
         "exec": "#984ea3",    # purple
         "anon": "#a65628",    # brown
-        "vdso": "#fc8eac",    # flamingo
-        "kernel": "#e41a1c",  # red
+        "vdso": "#ff1493",    # deep pink
+        "vvar": "#ffb6c1",    # light pink
+        "vsyscall": "#e41a1c",# red
         "file": "#66c2a5",    # turquoise
         "unknown": "#999999", # gray
     }
@@ -223,8 +225,8 @@ def create_page_reference_map(trace_file, pages, map_file=None):
             Patch(facecolor=color_for_region("file"), label="File (non-exec)"),
             Patch(facecolor=color_for_region("anon"), label="Anonymous"),
             Patch(facecolor=color_for_region("vdso"), label="VDSO"),
-            Patch(facecolor=color_for_region("kernel"), label="Kernel"),
-            
+            Patch(facecolor=color_for_region("vvar"), label="VVAR"),
+            Patch(facecolor=color_for_region("vsyscall"), label="VSYSCALL"),            
         ]
         print("  Memory coloring applied based on:", map_file)
 
